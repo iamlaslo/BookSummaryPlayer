@@ -8,12 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		264C67142B735F9200A69F64 /* BookSummaryPlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67132B735F9200A69F64 /* BookSummaryPlayerApp.swift */; };
-		264C67162B735F9200A69F64 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67152B735F9200A69F64 /* ContentView.swift */; };
 		264C67182B735F9300A69F64 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 264C67172B735F9300A69F64 /* Assets.xcassets */; };
 		264C671B2B735F9300A69F64 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 264C671A2B735F9300A69F64 /* Preview Assets.xcassets */; };
 		264C67252B735F9300A69F64 /* BookSummaryPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67242B735F9300A69F64 /* BookSummaryPlayerTests.swift */; };
 		264C672F2B735F9300A69F64 /* BookSummaryPlayerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C672E2B735F9300A69F64 /* BookSummaryPlayerUITests.swift */; };
 		264C67312B735F9300A69F64 /* BookSummaryPlayerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67302B735F9300A69F64 /* BookSummaryPlayerUITestsLaunchTests.swift */; };
+		264C673F2B735FB600A69F64 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 264C673E2B735FB600A69F64 /* ComposableArchitecture */; };
+		264C67432B735FCE00A69F64 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67422B735FCE00A69F64 /* Player.swift */; };
+		264C67452B73620B00A69F64 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67442B73620B00A69F64 /* PlayerView.swift */; };
+		264C67472B7369E100A69F64 /* PlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67462B7369E100A69F64 /* PlayerManager.swift */; };
+		264C67492B73760C00A69F64 /* Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67482B73760C00A69F64 /* Formatter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,7 +40,6 @@
 /* Begin PBXFileReference section */
 		264C67102B735F9200A69F64 /* BookSummaryPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookSummaryPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		264C67132B735F9200A69F64 /* BookSummaryPlayerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookSummaryPlayerApp.swift; sourceTree = "<group>"; };
-		264C67152B735F9200A69F64 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		264C67172B735F9300A69F64 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		264C671A2B735F9300A69F64 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		264C67202B735F9300A69F64 /* BookSummaryPlayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BookSummaryPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -44,6 +47,10 @@
 		264C672A2B735F9300A69F64 /* BookSummaryPlayerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BookSummaryPlayerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		264C672E2B735F9300A69F64 /* BookSummaryPlayerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookSummaryPlayerUITests.swift; sourceTree = "<group>"; };
 		264C67302B735F9300A69F64 /* BookSummaryPlayerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookSummaryPlayerUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		264C67422B735FCE00A69F64 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		264C67442B73620B00A69F64 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		264C67462B7369E100A69F64 /* PlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerManager.swift; sourceTree = "<group>"; };
+		264C67482B73760C00A69F64 /* Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				264C673F2B735FB600A69F64 /* ComposableArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,7 +103,9 @@
 			isa = PBXGroup;
 			children = (
 				264C67132B735F9200A69F64 /* BookSummaryPlayerApp.swift */,
-				264C67152B735F9200A69F64 /* ContentView.swift */,
+				264C67462B7369E100A69F64 /* PlayerManager.swift */,
+				264C67482B73760C00A69F64 /* Formatter.swift */,
+				264C67402B735FBC00A69F64 /* Features */,
 				264C67172B735F9300A69F64 /* Assets.xcassets */,
 				264C67192B735F9300A69F64 /* Preview Content */,
 			);
@@ -127,6 +137,23 @@
 			path = BookSummaryPlayerUITests;
 			sourceTree = "<group>";
 		};
+		264C67402B735FBC00A69F64 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				264C67412B735FC300A69F64 /* Player */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		264C67412B735FC300A69F64 /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				264C67422B735FCE00A69F64 /* Player.swift */,
+				264C67442B73620B00A69F64 /* PlayerView.swift */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -143,6 +170,9 @@
 			dependencies = (
 			);
 			name = BookSummaryPlayer;
+			packageProductDependencies = (
+				264C673E2B735FB600A69F64 /* ComposableArchitecture */,
+			);
 			productName = BookSummaryPlayer;
 			productReference = 264C67102B735F9200A69F64 /* BookSummaryPlayer.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +245,9 @@
 				Base,
 			);
 			mainGroup = 264C67072B735F9200A69F64;
+			packageReferences = (
+				264C673D2B735FB600A69F64 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+			);
 			productRefGroup = 264C67112B735F9200A69F64 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -257,7 +290,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				264C67162B735F9200A69F64 /* ContentView.swift in Sources */,
+				264C67452B73620B00A69F64 /* PlayerView.swift in Sources */,
+				264C67432B735FCE00A69F64 /* Player.swift in Sources */,
+				264C67472B7369E100A69F64 /* PlayerManager.swift in Sources */,
+				264C67492B73760C00A69F64 /* Formatter.swift in Sources */,
 				264C67142B735F9200A69F64 /* BookSummaryPlayerApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -588,6 +624,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		264C673D2B735FB600A69F64 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.7.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		264C673E2B735FB600A69F64 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 264C673D2B735FB600A69F64 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 264C67082B735F9200A69F64 /* Project object */;
 }

@@ -1,17 +1,14 @@
-//
-//  BookSummaryPlayerApp.swift
-//  BookSummaryPlayer
-//
-//  Created by Laslo Kozlov on 07.02.2024.
-//
-
 import SwiftUI
+import ComposableArchitecture
 
 @main
 struct BookSummaryPlayerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            PlayerView(store: Store(
+                initialState: Player.State(),
+                reducer: { Player()._printChanges() }
+            ))
         }
     }
 }
