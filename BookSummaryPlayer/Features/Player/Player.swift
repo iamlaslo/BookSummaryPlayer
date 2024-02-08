@@ -12,6 +12,11 @@ struct Player {
         var currentTime: Double = 0.0
         var totalTime: Double = 0.0
         var currentKeyPoint: BookSummary.KeyPoint?
+        @Presents var alert: AlertState<Action.Alert>? = nil
+        
+        init(bookSummary: BookSummary? = nil) {
+            self.bookSummary = bookSummary
+        }
     }
     
     enum Rate: Double, CaseIterable {
@@ -21,7 +26,7 @@ struct Player {
         case twice = 2
     }
     
-    enum Action {
+    enum Action: Equatable {
         case onAppear
         case playerManager(PlayerManager.Action)
         case playPauseTapped
@@ -30,11 +35,18 @@ struct Player {
         case moveBackwardTapped
         case moveForwardTapped
         case rateTapped
+        case isLoadingChanged(Bool)
         case seekingStatusChanged(Bool)
         case currentTimeChanged(Double)
+        case alert(PresentationAction<Alert>)
+        
+        enum Alert {
+            case dismissTapped
+        }
     }
     
     enum CancelID {
+        case isLoading
         case playerManager
         case playStatusThrottle
     }
@@ -45,18 +57,10 @@ struct Player {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                do {
-                    // Emulating like we're opening some book summary
-                    let item = Mock.bookSummary()
-                    if let firstKeyPoint = item.keyPoints?.first {
-                        state.currentKeyPoint = firstKeyPoint
-                        try playerManager.setItem(link: firstKeyPoint.link)
-                    }
-                    state.bookSummary = item
-                } catch {
-                    #warning("Throw error here")
-                }
-                return subscribeOnPlayerManager()
+                return .merge(
+                    subscribeOnPlayerManager(),
+                    emulateBookOpening(at: &state)
+                )
                 
             case .playerManager(let playerManagerActions):
                 switch playerManagerActions {
@@ -67,7 +71,18 @@ struct Player {
                     state.rate = Rate(rawValue: rate) ?? .full
                     return .none
                 case .controlStatusChanged(let newValue):
-                    state.isLoading = newValue == .waitingToPlayAtSpecifiedRate
+                    return .send(.isLoadingChanged(newValue == .waitingToPlayAtSpecifiedRate))
+                        .debounce(id: CancelID.isLoading, for: 0.3, scheduler: DispatchQueue.main)
+                case .error(let playerError):
+                    state.isPlaying = false
+                    state.isLoading = true
+                    state.alert = .init(title: {
+                        TextState("Alert!")
+                    }, actions: {
+                        .default(TextState("OK"), action: .send(.dismissTapped))
+                    }, message: {
+                        TextState(playerError.message)
+                    })
                     return .none
                 }
                 
@@ -85,7 +100,7 @@ struct Player {
                 return .none
                 
             case .moveBackwardTapped:
-                if 
+                if
                     let keyPoints = state.bookSummary?.keyPoints,
                     let currentKeyPoint = state.currentKeyPoint,
                     let index = keyPoints.firstIndex(of: currentKeyPoint),
@@ -114,6 +129,10 @@ struct Player {
                 }
                 return .none
                 
+            case .isLoadingChanged(let newValue):
+                state.isLoading = newValue
+                return .none
+                
             case .seekingStatusChanged(let newValue):
                 if state.isPlaying {
                     newValue ? playerManager.pauseAudio() : playerManager.startAudio()
@@ -124,16 +143,20 @@ struct Player {
                 state.currentTime = currentTime
                 playerManager.seek(to: currentTime)
                 return .none
+                
+            case .alert(.presented(.dismissTapped)):
+                state.alert = nil
+                return .none
+                
+            case .alert:
+                return .none
             }
         }
+        .ifLet(\.$alert, action: \.alert)
         .onChange(of: \.currentKeyPoint) { _, currentKeyPoint in
             Reduce { _, _ in
                 if let link = currentKeyPoint?.link {
-                    do {
-                        try playerManager.setItem(link: link)
-                    } catch {
-                        #warning("Throw error here")
-                    }
+                    playerManager.setItem(link: link)
                 }
                 return .none
             }
@@ -145,5 +168,16 @@ struct Player {
             .delegate()
             .map(Player.Action.playerManager)
             .cancellable(id: CancelID.playerManager, cancelInFlight: true)
+    }
+    
+    private func emulateBookOpening(at state: inout State) -> Effect<Action> {
+        // Emulating like we're opening some book summary
+        let item = Mock.bookSummary()
+        if let firstKeyPoint = item.keyPoints?.first {
+            state.currentKeyPoint = firstKeyPoint
+            playerManager.setItem(link: firstKeyPoint.link)
+        }
+        state.bookSummary = item
+        return .none
     }
 }

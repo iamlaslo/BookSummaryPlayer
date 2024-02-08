@@ -49,6 +49,7 @@ struct PlayerView: View {
             .background { Color.background.ignoresSafeArea() }
         }
         .onAppear { store.send(.onAppear) }
+        .alert($store.scope(state: \.alert, action: \.alert))
     }
     
     // MARK: Views

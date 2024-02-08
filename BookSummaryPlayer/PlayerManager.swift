@@ -6,26 +6,29 @@ import ComposableArchitecture
 final class PlayerManager {
     
     enum PlayerError: Error {
-        case invalidUrl
+        case badUrl
+        case failedAudioSession
+        
+        var message: String {
+            switch self {
+            case .badUrl:
+                "There are some problems with summary's URL, please try again later."
+            case .failedAudioSession:
+                "Something went wrong with your audio session!"
+            }
+        }
     }
     
-    enum Action {
+    enum Action: Equatable {
         case timeChanged(Double)
         case rateChanged(Double)
         case controlStatusChanged(AVPlayer.TimeControlStatus)
+        case error(PlayerError)
     }
     
     // MARK: - Properties
     
     private let delegateSubject = PassthroughSubject<Action, Never>()
-    private var statusObserver: NSKeyValueObservation?
-    private var timeObserver: AnyCancellable?
-    private var rateObserver: AnyCancellable?
-    private var timeControlObserver: AnyCancellable?
-    
-    private var observers: [AnyCancellable?] {
-        [timeObserver, rateObserver, timeControlObserver]
-    }
     
     private var player: AVPlayer? {
         didSet {
@@ -36,10 +39,17 @@ final class PlayerManager {
             } else {
                 observers.forEach { $0?.cancel() }
             }
-            
         }
     }
-    private var session = AVAudioSession.sharedInstance()
+    
+    private let session = AVAudioSession.sharedInstance()
+    
+    private var timeObserver: AnyCancellable?
+    private var rateObserver: AnyCancellable?
+    private var timeControlObserver: AnyCancellable?
+    private var observers: [AnyCancellable?] {
+        [timeObserver, rateObserver, timeControlObserver]
+    }
     
     // MARK: Public
     
@@ -47,7 +57,7 @@ final class PlayerManager {
         return .publisher { self.delegateSubject.receive(on: DispatchQueue.main) }
     }
     
-    public func setItem(link: String) throws {
+    public func setItem(link: String) {
         if let url = URL(string: link) {
             let playerItem: AVPlayerItem = AVPlayerItem(url: url)
             if let player {
@@ -55,8 +65,10 @@ final class PlayerManager {
             } else {
                 player = AVPlayer(playerItem: playerItem)
             }
+            setupAudioSession()
         } else {
-            throw PlayerError.invalidUrl
+            player = nil
+            delegateSubject.send(.error(.badUrl))
         }
     }
     
@@ -95,6 +107,16 @@ final class PlayerManager {
     }
     
     // MARK: Private
+    
+    private func setupAudioSession() {
+        do {
+            if session.category != .playback, session.mode != .spokenAudio {
+                try session.setCategory(.playback, mode: .spokenAudio)
+            }
+        } catch {
+            delegateSubject.send(.error(.failedAudioSession))
+        }
+    }
     
     private func setupTimeObserver() {
         timeObserver = Timer.publish(every: 0.1, on: .main, in: .common)

@@ -11,7 +11,7 @@ extension Mock {
         keyPoints: [BookSummary.KeyPoint]? = [
             .init(name: "First", duration: 348, link: Self.link),
             .init(name: "Second", duration: 348, link: Self.link),
-            .init(name: "Third", duration: 348, link: Self.link),
+            .init(name: "Third", duration: 348, link: ""),
             .init(name: "Fourth", duration: 348, link: Self.link),
             .init(name: "Fifth", duration: 348, link: Self.link)
         ]
