@@ -12,6 +12,7 @@ final class PlayerManager {
     enum Action {
         case timeChanged(Double)
         case rateChanged(Double)
+        case controlStatusChanged(AVPlayer.TimeControlStatus)
     }
     
     // MARK: - Properties
@@ -19,25 +20,26 @@ final class PlayerManager {
     private let delegateSubject = PassthroughSubject<Action, Never>()
     private var statusObserver: NSKeyValueObservation?
     private var timeObserver: AnyCancellable?
-    private var rateObserver: NSKeyValueObservation?
+    private var rateObserver: AnyCancellable?
+    private var timeControlObserver: AnyCancellable?
+    
+    private var observers: [AnyCancellable?] {
+        [timeObserver, rateObserver, timeControlObserver]
+    }
     
     private var player: AVPlayer? {
         didSet {
-            setupRateObserver()
+            if player != nil {
+                setupTimeObserver()
+                setupRateObserver()
+                setupTimeControlObserver()
+            } else {
+                observers.forEach { $0?.cancel() }
+            }
+            
         }
     }
     private var session = AVAudioSession.sharedInstance()
-    
-    // MARK: - Initialization
-    
-    init() {
-        setupTimeObserver()
-    }
-    
-    deinit {
-        timeObserver?.cancel()
-        rateObserver?.invalidate()
-    }
     
     // MARK: Public
     
@@ -105,12 +107,14 @@ final class PlayerManager {
     }
     
     private func setupRateObserver() {
-        rateObserver = player?.observe(\.defaultRate, options: [.initial, .new]) { [weak self] player, change in
-            guard let self = self else { return }
-            if let newRate = change.newValue {
-                print("### newRate \(newRate)")
-                self.delegateSubject.send(.rateChanged(Double(newRate)))
-            }
+        rateObserver = player?.publisher(for: \.defaultRate, options: [.initial, .new]).sink { newValue in
+            self.delegateSubject.send(.rateChanged(Double(newValue)))
+        }
+    }
+    
+    private func setupTimeControlObserver() {
+        timeControlObserver = player?.publisher(for: \.timeControlStatus).sink { newValue in
+            self.delegateSubject.send(.controlStatusChanged(newValue))
         }
     }
 }

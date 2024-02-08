@@ -1,51 +1,17 @@
 import Foundation
 import ComposableArchitecture
 
-struct BookSummary: Identifiable, Equatable {
-    let id = UUID()
-    let name: String
-    let cover: Data
-    let keyPoints: [KeyPoint]?
-    let duration: Double
-    let link: String
-    
-    struct KeyPoint: Equatable {
-        let name: String
-        let startTime: Double
-    }
-}
-
-struct Mock { }
-extension Mock {
-    static func bookSummary(
-        name: String = "BookSummary",
-        cover: Data = .init(),
-        keyPoints: [BookSummary.KeyPoint]? = [
-            .init(name: "First", startTime: 0),
-            .init(name: "Second", startTime: 15),
-            .init(name: "Third", startTime: 55),
-            .init(name: "Fourth", startTime: 131),
-            .init(name: "Fifth", startTime: 215)
-        ],
-        duration: Double = 348,
-        link: String = "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3"
-    ) -> BookSummary {
-        BookSummary(name: name, cover: cover, keyPoints: keyPoints, duration: duration, link: link)
-    }
-}
-
 @Reducer
 struct Player {
     @ObservableState
     struct State: Equatable {
         var bookSummary: BookSummary?
         var rate: Rate = .full
+        var isLoading = false
         var isPlaying = false
         var currentTime: Double = 0.0
         var totalTime: Double = 0.0
-        var currentKeyPointIndex: Int? {
-            bookSummary?.keyPoints?.lastIndex(where: { $0.startTime <= self.currentTime })
-        }
+        var currentKeyPoint: BookSummary.KeyPoint?
     }
     
     enum Rate: Double, CaseIterable {
@@ -59,9 +25,12 @@ struct Player {
         case onAppear
         case playerManager(PlayerManager.Action)
         case playPauseTapped
-        case seekForwardTapped
         case seekBackwardTapped
+        case seekForwardTapped
+        case moveBackwardTapped
+        case moveForwardTapped
         case rateTapped
+        case seekingStatusChanged(Bool)
         case currentTimeChanged(Double)
     }
     
@@ -79,12 +48,14 @@ struct Player {
                 do {
                     // Emulating like we're opening some book summary
                     let item = Mock.bookSummary()
-                    try playerManager.setItem(link: item.link)
+                    if let firstKeyPoint = item.keyPoints?.first {
+                        state.currentKeyPoint = firstKeyPoint
+                        try playerManager.setItem(link: firstKeyPoint.link)
+                    }
                     state.bookSummary = item
                 } catch {
                     #warning("Throw error here")
                 }
-                
                 return subscribeOnPlayerManager()
                 
             case .playerManager(let playerManagerActions):
@@ -94,6 +65,9 @@ struct Player {
                     return .none
                 case .rateChanged(let rate):
                     state.rate = Rate(rawValue: rate) ?? .full
+                    return .none
+                case .controlStatusChanged(let newValue):
+                    state.isLoading = newValue == .waitingToPlayAtSpecifiedRate
                     return .none
                 }
                 
@@ -110,9 +84,26 @@ struct Player {
                 playerManager.seekForward(for: 10)
                 return .none
                 
-            case .currentTimeChanged(let currentTime):
-                state.currentTime = currentTime
-                playerManager.seek(to: currentTime)
+            case .moveBackwardTapped:
+                if 
+                    let keyPoints = state.bookSummary?.keyPoints,
+                    let currentKeyPoint = state.currentKeyPoint,
+                    let index = keyPoints.firstIndex(of: currentKeyPoint),
+                    index > 0
+                {
+                    state.currentKeyPoint = keyPoints[index - 1]
+                }
+                return .none
+                
+            case .moveForwardTapped:
+                if
+                    let keyPoints = state.bookSummary?.keyPoints,
+                    let currentKeyPoint = state.currentKeyPoint,
+                    let index = keyPoints.firstIndex(of: currentKeyPoint),
+                    index < keyPoints.count - 1
+                {
+                    state.currentKeyPoint = keyPoints[index + 1]
+                }
                 return .none
                 
             case .rateTapped:
@@ -120,6 +111,29 @@ struct Player {
                     playerManager.changeRate(
                         to: Rate.allCases[(currentRateIndex + 1) % Rate.allCases.count].rawValue
                     )
+                }
+                return .none
+                
+            case .seekingStatusChanged(let newValue):
+                if state.isPlaying {
+                    newValue ? playerManager.pauseAudio() : playerManager.startAudio()
+                }
+                return .none
+                
+            case .currentTimeChanged(let currentTime):
+                state.currentTime = currentTime
+                playerManager.seek(to: currentTime)
+                return .none
+            }
+        }
+        .onChange(of: \.currentKeyPoint) { _, currentKeyPoint in
+            Reduce { _, _ in
+                if let link = currentKeyPoint?.link {
+                    do {
+                        try playerManager.setItem(link: link)
+                    } catch {
+                        #warning("Throw error here")
+                    }
                 }
                 return .none
             }

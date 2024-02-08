@@ -1,6 +1,32 @@
 import SwiftUI
 import ComposableArchitecture
 
+fileprivate extension Player.State {
+    var currentKeyPointIndex: Int? {
+        if let currentKeyPoint {
+            return bookSummary?.keyPoints?.firstIndex(of: currentKeyPoint)
+        } else {
+            return nil
+        }
+    }
+    
+    var moveBackwardDisabled: Bool {
+        if let currentKeyPointIndex {
+            return currentKeyPointIndex < 1
+        } else {
+            return false
+        }
+    }
+    
+    var moveForwardDisabled: Bool {
+        if let currentKeyPointIndex, let keyPointsCount = bookSummary?.keyPoints?.count {
+            return currentKeyPointIndex >= keyPointsCount - 1
+        } else {
+            return false
+        }
+    }
+}
+
 struct PlayerView: View {
     
     // MARK: Properties
@@ -19,7 +45,7 @@ struct PlayerView: View {
                 buttonsView
             }
             .padding(20)
-            .frame(height: geometry.size.height)
+            .frame(width: geometry.size.width, height: geometry.size.height)
             .background { Color.background.ignoresSafeArea() }
         }
         .onAppear { store.send(.onAppear) }
@@ -37,11 +63,11 @@ struct PlayerView: View {
     @ViewBuilder
     private var keyPointView: some View {
         if
+            let keyPoint = store.currentKeyPoint,
             let keyPointIndex = store.currentKeyPointIndex,
-            let keyPoint = store.bookSummary?.keyPoints?[keyPointIndex],
             let totalCount = store.bookSummary?.keyPoints?.count
         {
-            VStack(spacing: 12) {
+            VStack(spacing: 8) {
                 Text("KEY POINT \(keyPointIndex + 1) OF \(totalCount)")
                     .font(.system(size: 13, design: .monospaced))
                     .foregroundStyle(.textGrey)
@@ -56,17 +82,23 @@ struct PlayerView: View {
     
     @ViewBuilder
     private var sliderView: some View {
-        if let bookSummary = store.bookSummary {
+        if let currentKeyPoint = store.currentKeyPoint {
             HStack {
                 Text(Formatter.time(from: store.currentTime))
                     .font(.system(size: 13, design: .monospaced))
                     .foregroundStyle(.textGrey)
                 
-                Slider(value: $store.currentTime.sending(\.currentTimeChanged), in: 0...(bookSummary.duration))
-                    .animation(.linear, value: store.currentTime)
-                    .tint(.accent)
+                Slider(
+                    value: $store.currentTime.sending(\.currentTimeChanged),
+                    in: 0...(currentKeyPoint.duration)
+                ) { editing in
+                    store.send(.seekingStatusChanged(editing))
+                }
+                .animation(.linear, value: store.currentTime)
+                .tint(.accent)
+                .disabled(store.isLoading)
                 
-                Text(Formatter.time(from: bookSummary.duration))
+                Text(Formatter.time(from: currentKeyPoint.duration))
                     .font(.system(size: 13, design: .monospaced))
                     .foregroundStyle(.textGrey)
             }
@@ -92,16 +124,29 @@ struct PlayerView: View {
     }
     
     private var buttonsView: some View {
-        HStack(spacing: 40) {
+        HStack(spacing: 10) {
+            Button {
+                store.send(.moveBackwardTapped)
+            } label: {
+                Image(systemName: "backward.end.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 26, height: 26)
+                    .foregroundStyle(.main)
+                    .fontWeight(.ultraLight)
+            }
+            .disabled(store.moveBackwardDisabled)
+            
             Button {
                 store.send(.seekBackwardTapped)
             } label: {
                 Image(systemName: "arrow.counterclockwise")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 40, height: 40)
-                    .foregroundStyle(.black)
+                    .frame(width: 32, height: 32)
+                    .foregroundStyle(.main)
             }
+            .disabled(store.isLoading)
             
             playPauseButton
             
@@ -111,43 +156,50 @@ struct PlayerView: View {
                 Image(systemName: "arrow.clockwise")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 40, height: 40)
-                    .foregroundStyle(.black)
+                    .frame(width: 32, height: 32)
+                    .foregroundStyle(.main)
             }
+            .disabled(store.isLoading)
+            
+            Button {
+                store.send(.moveForwardTapped)
+            } label: {
+                Image(systemName: "forward.end.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 26, height: 26)
+                    .foregroundStyle(.main)
+                    .fontWeight(.ultraLight)
+            }
+            .disabled(store.moveForwardDisabled)
         }
-        .buttonStyle(PressEffectButtonStyle())
+        .buttonStyle(PlayerButtonStyle())
+    }
+    
+    private var loaderView: some View {
+        ProgressView()
+            .foregroundStyle(.main)
+            .controlSize(.extraLarge)
     }
     
     private var playPauseButton: some View {
         Button {
             store.send(.playPauseTapped)
         } label: {
-            Image(systemName: store.isPlaying ? "pause.fill" : "play.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 40, height: 40)
-                .foregroundStyle(.black)
-                .offset(x: store.isPlaying ? 0 : 4)
-        }
-//        .buttonStyle(PressEffectButtonStyle())
-        .contentTransition(.symbolEffect(.replace))
-    }
-}
-
-struct PressEffectButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .padding()
-            .scaleEffect(configuration.isPressed ? 0.8 : 1.0)
-            .opacity(configuration.isPressed ? 0.6 : 1.0)
-            .animation(.easeInOut, value: configuration.isPressed)
-            .background {
-                Circle()
-                    .foregroundStyle(.pressed)
-                    .scaleEffect(configuration.isPressed ? 0.9 : 1, anchor: .center)
-                    .opacity(configuration.isPressed ? 1 : 0)
-                    .animation(.easeInOut(duration: 0.2), value: configuration.isPressed)
+            if store.isLoading {
+                loaderView
+            } else {
+                Image(systemName: store.isPlaying ? "pause.fill" : "play.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(.main)
+                    .frame(width: 40, height: 40)
+                    .offset(x: store.isPlaying ? 0 : 4)
             }
+        }
+        .frame(width: 60, height: 60)
+        .contentTransition(.symbolEffect(.replace))
+        .disabled(store.isLoading)
     }
 }
 
