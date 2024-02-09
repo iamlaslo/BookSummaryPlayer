@@ -15,7 +15,7 @@
 		264C67452B73620B00A69F64 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67442B73620B00A69F64 /* PlayerView.swift */; };
 		264C67472B7369E100A69F64 /* PlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67462B7369E100A69F64 /* PlayerManager.swift */; };
 		264C67492B73760C00A69F64 /* Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264C67482B73760C00A69F64 /* Formatter.swift */; };
-		26E1B1282B752D7800FF25A1 /* PlayerButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E1B1272B752D7800FF25A1 /* PlayerButtonStyle.swift */; };
+		26CC81252B76CD3E00C00D99 /* PlayerButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CC81242B76CD3E00C00D99 /* PlayerButtonStyle.swift */; };
 		26F536492B75214A00205A12 /* BookSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F536482B75214A00205A12 /* BookSummary.swift */; };
 		26F5364C2B75215700205A12 /* Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F5364B2B75215700205A12 /* Mock.swift */; };
 		26F5364E2B75216600205A12 /* Mock+BookSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F5364D2B75216600205A12 /* Mock+BookSummary.swift */; };
@@ -41,7 +41,7 @@
 		264C67442B73620B00A69F64 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		264C67462B7369E100A69F64 /* PlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerManager.swift; sourceTree = "<group>"; };
 		264C67482B73760C00A69F64 /* Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatter.swift; sourceTree = "<group>"; };
-		26E1B1272B752D7800FF25A1 /* PlayerButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlayerButtonStyle.swift; path = ../../../../PlayerButtonStyle.swift; sourceTree = "<group>"; };
+		26CC81242B76CD3E00C00D99 /* PlayerButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerButtonStyle.swift; sourceTree = "<group>"; };
 		26F536482B75214A00205A12 /* BookSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookSummary.swift; sourceTree = "<group>"; };
 		26F5364B2B75215700205A12 /* Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mock.swift; sourceTree = "<group>"; };
 		26F5364D2B75216600205A12 /* Mock+BookSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Mock+BookSummary.swift"; sourceTree = "<group>"; };
@@ -139,7 +139,7 @@
 		26E1B1262B752D6F00FF25A1 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				26E1B1272B752D7800FF25A1 /* PlayerButtonStyle.swift */,
+				26CC81242B76CD3E00C00D99 /* PlayerButtonStyle.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -273,11 +273,11 @@
 				264C67452B73620B00A69F64 /* PlayerView.swift in Sources */,
 				26F536492B75214A00205A12 /* BookSummary.swift in Sources */,
 				264C67432B735FCE00A69F64 /* Player.swift in Sources */,
-				26E1B1282B752D7800FF25A1 /* PlayerButtonStyle.swift in Sources */,
 				26F5364C2B75215700205A12 /* Mock.swift in Sources */,
 				264C67472B7369E100A69F64 /* PlayerManager.swift in Sources */,
 				264C67492B73760C00A69F64 /* Formatter.swift in Sources */,
 				264C67142B735F9200A69F64 /* BookSummaryPlayerApp.swift in Sources */,
+				26CC81252B76CD3E00C00D99 /* PlayerButtonStyle.swift in Sources */,
 				26F5364E2B75216600205A12 /* Mock+BookSummary.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
