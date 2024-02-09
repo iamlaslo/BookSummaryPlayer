@@ -14,30 +14,6 @@ struct Player {
         var totalTime: Double = 0.0
         var currentKeyPoint: BookSummary.KeyPoint?
         @Presents var alert: AlertState<Action.Alert>? = nil
-        
-        var currentKeyPointIndex: Int? {
-            if let currentKeyPoint {
-                return bookSummary?.keyPoints?.firstIndex(of: currentKeyPoint)
-            } else {
-                return nil
-            }
-        }
-        
-        var moveBackwardDisabled: Bool {
-            if let currentKeyPointIndex {
-                return currentKeyPointIndex < 1
-            } else {
-                return false
-            }
-        }
-        
-        var moveForwardDisabled: Bool {
-            if let currentKeyPointIndex, let keyPointsCount = bookSummary?.keyPoints?.count {
-                return currentKeyPointIndex >= keyPointsCount - 1
-            } else {
-                return false
-            }
-        }
     }
     
     enum Rate: Double, CaseIterable {

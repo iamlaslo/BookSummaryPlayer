@@ -1,6 +1,32 @@
 import SwiftUI
 import ComposableArchitecture
 
+fileprivate extension Player.State {
+    var currentKeyPointIndex: Int? {
+        if let currentKeyPoint {
+            return bookSummary?.keyPoints?.firstIndex(of: currentKeyPoint)
+        } else {
+            return nil
+        }
+    }
+    
+    var moveBackwardDisabled: Bool {
+        if let currentKeyPointIndex {
+            return currentKeyPointIndex < 1
+        } else {
+            return false
+        }
+    }
+    
+    var moveForwardDisabled: Bool {
+        if let currentKeyPointIndex, let keyPointsCount = bookSummary?.keyPoints?.count {
+            return currentKeyPointIndex >= keyPointsCount - 1
+        } else {
+            return false
+        }
+    }
+}
+
 struct PlayerView: View {
     
     // MARK: Properties
@@ -115,10 +141,10 @@ struct PlayerView: View {
             Button {
                 store.send(.seekBackwardTapped)
             } label: {
-                Image(systemName: "arrow.counterclockwise")
+                Image(.seekBackward)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 32, height: 32)
+                    .frame(width: 40, height: 40)
                     .foregroundStyle(.main)
             }
             .disabled(store.isLoading)
@@ -128,10 +154,10 @@ struct PlayerView: View {
             Button {
                 store.send(.seekForwardTapped)
             } label: {
-                Image(systemName: "arrow.clockwise")
+                Image(.seekForward)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 32, height: 32)
+                    .frame(width: 40, height: 40)
                     .foregroundStyle(.main)
             }
             .disabled(store.isLoading)

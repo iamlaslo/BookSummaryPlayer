@@ -3,21 +3,7 @@ import Combine
 import AVFoundation
 import ComposableArchitecture
 
-class PlayerManager {
-    
-    enum PlayerError: Error {
-        case badUrl
-        case failedAudioSession
-        
-        var message: String {
-            switch self {
-            case .badUrl:
-                "There are some problems with summary's URL, please try again later."
-            case .failedAudioSession:
-                "Something went wrong with your audio session!"
-            }
-        }
-    }
+final class PlayerManager {
     
     enum Action: Equatable {
         case timeChanged(Double)
@@ -143,6 +129,22 @@ class PlayerManager {
     }
 }
 
+extension PlayerManager {
+    enum PlayerError: Error {
+        case badUrl
+        case failedAudioSession
+        
+        var message: String {
+            switch self {
+            case .badUrl:
+                "There are some problems with summary's URL, please try again later."
+            case .failedAudioSession:
+                "Something went wrong with your audio session!"
+            }
+        }
+    }
+}
+
 extension DependencyValues {
     var playerManager: PlayerManager {
         get { self[PlayerManager.self] }
@@ -152,26 +154,10 @@ extension DependencyValues {
 
 extension PlayerManager: DependencyKey {
     static var liveValue: PlayerManager {
-        PlayerManager()
+        Self()
     }
     
     static var testValue: PlayerManager {
-        PlayerManagerMock()
-    }
-}
-
-final class PlayerManagerMock: PlayerManager {
-    override init() {
-        super.init()
-        self.observers.forEach { $0?.cancel() }
-        self.setItem(link: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
-    }
-    
-    override func setupTimeObserver() {
-        return
-    }
-    
-    override func seekForward(for value: Double) {
-        self.delegateSubject.send(.timeChanged(value))
+        Self()
     }
 }
