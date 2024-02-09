@@ -6,6 +6,7 @@ extension Mock {
     }
     
     static func bookSummary(
+        id: Int = 0,
         name: String = "BookSummary",
         cover: Data = .init(),
         keyPoints: [BookSummary.KeyPoint]? = [
@@ -16,6 +17,6 @@ extension Mock {
             .init(name: "Fifth", duration: 348, link: Self.link)
         ]
     ) -> BookSummary {
-        BookSummary(name: name, cover: cover, keyPoints: keyPoints)
+        BookSummary(id: id, name: name, cover: cover, keyPoints: keyPoints)
     }
 }

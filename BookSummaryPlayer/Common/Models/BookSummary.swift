@@ -1,7 +1,7 @@
 import Foundation
 
 struct BookSummary: Identifiable, Equatable {
-    let id = UUID()
+    let id: Int
     let name: String
     let cover: Data
     let keyPoints: [KeyPoint]?

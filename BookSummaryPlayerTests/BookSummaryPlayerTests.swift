@@ -1,36 +1,62 @@
-//
-//  BookSummaryPlayerTests.swift
-//  BookSummaryPlayerTests
-//
-//  Created by Laslo Kozlov on 07.02.2024.
-//
-
 import XCTest
+import ComposableArchitecture
 @testable import BookSummaryPlayer
 
+@MainActor
 final class BookSummaryPlayerTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    func testInitValues() async {
+        let testScheduler = DispatchQueue.test
+        let store = TestStore(initialState: Player.State()) {
+            Player()
+                .dependency(\.mainQueue, testScheduler.eraseToAnyScheduler())
+        }
+        
+        await store.send(.onAppear) {
+            $0.bookSummary = Mock.bookSummary()
+            $0.currentKeyPoint = Mock.bookSummary().keyPoints?.first
+            $0.isPlaying = false
+        }
+        
+        await store.send(.cancel(.playerManager))
+        
+        await store.send(.moveForwardTapped) {
+            $0.currentKeyPoint = Mock.bookSummary().keyPoints?[1]
+        }
+        
+        await store.send(.moveBackwardTapped) {
+            $0.currentKeyPoint = Mock.bookSummary().keyPoints?.first
         }
     }
+    
+    func testPlayPauseTapped() async {
+        let store = TestStore(initialState: Player.State(isPlaying: false)) {
+            Player()
+        }
+        
+        await store.send(.playPauseTapped) {
+            $0.isPlaying = true
+        }
+        
+        await store.send(.playPauseTapped) {
+            $0.isPlaying = false
+        }
+    }
+    
+    func testErrorHandling() async {
+        let store = TestStore(initialState: Player.State()) {
+            Player()
+        }
 
+        await store.send(.playerManager(.error(.badUrl))) {
+            $0.isPlaying = false
+            $0.isLoading = true
+            $0.alert = .init(title: {
+                TextState("Alert!")
+            }, actions: {
+                .default(TextState("OK"), action: .send(.dismissTapped))
+            }, message: {
+                TextState(PlayerManager.PlayerError.badUrl.message)
+            })
+        }
+    }
 }

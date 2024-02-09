@@ -1,32 +1,6 @@
 import SwiftUI
 import ComposableArchitecture
 
-fileprivate extension Player.State {
-    var currentKeyPointIndex: Int? {
-        if let currentKeyPoint {
-            return bookSummary?.keyPoints?.firstIndex(of: currentKeyPoint)
-        } else {
-            return nil
-        }
-    }
-    
-    var moveBackwardDisabled: Bool {
-        if let currentKeyPointIndex {
-            return currentKeyPointIndex < 1
-        } else {
-            return false
-        }
-    }
-    
-    var moveForwardDisabled: Bool {
-        if let currentKeyPointIndex, let keyPointsCount = bookSummary?.keyPoints?.count {
-            return currentKeyPointIndex >= keyPointsCount - 1
-        } else {
-            return false
-        }
-    }
-}
-
 struct PlayerView: View {
     
     // MARK: Properties

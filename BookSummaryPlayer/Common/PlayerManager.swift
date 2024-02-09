@@ -3,7 +3,7 @@ import Combine
 import AVFoundation
 import ComposableArchitecture
 
-final class PlayerManager {
+class PlayerManager {
     
     enum PlayerError: Error {
         case badUrl
@@ -28,7 +28,7 @@ final class PlayerManager {
     
     // MARK: - Properties
     
-    private let delegateSubject = PassthroughSubject<Action, Never>()
+    let delegateSubject = PassthroughSubject<Action, Never>()
     
     private var player: AVPlayer? {
         didSet {
@@ -47,7 +47,7 @@ final class PlayerManager {
     private var timeObserver: AnyCancellable?
     private var rateObserver: AnyCancellable?
     private var timeControlObserver: AnyCancellable?
-    private var observers: [AnyCancellable?] {
+    var observers: [AnyCancellable?] {
         [timeObserver, rateObserver, timeControlObserver]
     }
     
@@ -118,7 +118,7 @@ final class PlayerManager {
         }
     }
     
-    private func setupTimeObserver() {
+    func setupTimeObserver() {
         timeObserver = Timer.publish(every: 0.1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
@@ -129,13 +129,15 @@ final class PlayerManager {
     }
     
     private func setupRateObserver() {
-        rateObserver = player?.publisher(for: \.defaultRate, options: [.initial, .new]).sink { newValue in
+        rateObserver = player?.publisher(for: \.defaultRate, options: [.initial, .new]).sink { [weak self] newValue in
+            guard let self = self else { return }
             self.delegateSubject.send(.rateChanged(Double(newValue)))
         }
     }
     
     private func setupTimeControlObserver() {
-        timeControlObserver = player?.publisher(for: \.timeControlStatus).sink { newValue in
+        timeControlObserver = player?.publisher(for: \.timeControlStatus).sink { [weak self] newValue in
+            guard let self = self else { return }
             self.delegateSubject.send(.controlStatusChanged(newValue))
         }
     }
@@ -150,6 +152,26 @@ extension DependencyValues {
 
 extension PlayerManager: DependencyKey {
     static var liveValue: PlayerManager {
-        Self()
+        PlayerManager()
+    }
+    
+    static var testValue: PlayerManager {
+        PlayerManagerMock()
+    }
+}
+
+final class PlayerManagerMock: PlayerManager {
+    override init() {
+        super.init()
+        self.observers.forEach { $0?.cancel() }
+        self.setItem(link: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+    }
+    
+    override func setupTimeObserver() {
+        return
+    }
+    
+    override func seekForward(for value: Double) {
+        self.delegateSubject.send(.timeChanged(value))
     }
 }

@@ -3,6 +3,7 @@ import ComposableArchitecture
 
 @Reducer
 struct Player {
+    
     @ObservableState
     struct State: Equatable {
         var bookSummary: BookSummary?
@@ -14,8 +15,28 @@ struct Player {
         var currentKeyPoint: BookSummary.KeyPoint?
         @Presents var alert: AlertState<Action.Alert>? = nil
         
-        init(bookSummary: BookSummary? = nil) {
-            self.bookSummary = bookSummary
+        var currentKeyPointIndex: Int? {
+            if let currentKeyPoint {
+                return bookSummary?.keyPoints?.firstIndex(of: currentKeyPoint)
+            } else {
+                return nil
+            }
+        }
+        
+        var moveBackwardDisabled: Bool {
+            if let currentKeyPointIndex {
+                return currentKeyPointIndex < 1
+            } else {
+                return false
+            }
+        }
+        
+        var moveForwardDisabled: Bool {
+            if let currentKeyPointIndex, let keyPointsCount = bookSummary?.keyPoints?.count {
+                return currentKeyPointIndex >= keyPointsCount - 1
+            } else {
+                return false
+            }
         }
     }
     
@@ -39,6 +60,7 @@ struct Player {
         case seekingStatusChanged(Bool)
         case currentTimeChanged(Double)
         case alert(PresentationAction<Alert>)
+        case cancel(CancelID)
         
         enum Alert {
             case dismissTapped
@@ -74,16 +96,7 @@ struct Player {
                     return .send(.isLoadingChanged(newValue == .waitingToPlayAtSpecifiedRate))
                         .debounce(id: CancelID.isLoading, for: 0.3, scheduler: DispatchQueue.main)
                 case .error(let playerError):
-                    state.isPlaying = false
-                    state.isLoading = true
-                    state.alert = .init(title: {
-                        TextState("Alert!")
-                    }, actions: {
-                        .default(TextState("OK"), action: .send(.dismissTapped))
-                    }, message: {
-                        TextState(playerError.message)
-                    })
-                    return .none
+                    return handleError(playerError, at: &state)
                 }
                 
             case .playPauseTapped:
@@ -150,6 +163,9 @@ struct Player {
                 
             case .alert:
                 return .none
+                
+            case .cancel(let id):
+                return .cancel(id: id)
             }
         }
         .ifLet(\.$alert, action: \.alert)
@@ -178,6 +194,19 @@ struct Player {
             playerManager.setItem(link: firstKeyPoint.link)
         }
         state.bookSummary = item
+        return .none
+    }
+    
+    private func handleError(_ error: PlayerManager.PlayerError, at state: inout State) -> Effect<Action> {
+        state.isPlaying = false
+        state.isLoading = true
+        state.alert = .init(title: {
+            TextState("Alert!")
+        }, actions: {
+            .default(TextState("OK"), action: .send(.dismissTapped))
+        }, message: {
+            TextState(error.message)
+        })
         return .none
     }
 }
